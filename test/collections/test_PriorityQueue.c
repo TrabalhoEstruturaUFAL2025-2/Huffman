@@ -37,6 +37,8 @@ void test_PriorityQueueBehaviour(void)
 
 	TEST_ASSERT_EQUAL_INT(bar, got);
 	TEST_ASSERT_EQUAL_INT(1, priority);
+
+	priority_queue_free(q);
 }
 
 #endif // TEST
