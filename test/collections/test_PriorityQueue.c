@@ -28,14 +28,14 @@ void test_PriorityQueueBehaviour(void)
 
 	PriorityQueue *q = priority_queue_new();
 
-	priority_queue_enqueue(q, (void *) foo, 3);
-	priority_queue_enqueue(q, (void *) bar, 1);
-	priority_queue_enqueue(q, (void *) baz, 1);
+	priority_queue_enqueue(q, (void *) &foo, 3);
+	priority_queue_enqueue(q, (void *) &bar, 1);
+	priority_queue_enqueue(q, (void *) &baz, 1);
 
-	enum Item got;
+	enum Item *got;
 	int priority = priority_queue_dequeue(q, (void **) &got);
 
-	TEST_ASSERT_EQUAL_INT(bar, got);
+	TEST_ASSERT_EQUAL_INT(bar, *got);
 	TEST_ASSERT_EQUAL_INT(1, priority);
 
 	priority_queue_free(q);
