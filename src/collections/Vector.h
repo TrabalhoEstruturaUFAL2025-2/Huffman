@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define VECTOR_DEFAULT_CAPACITY 256
+
 typedef struct Vector {
 	size_t size;
 	size_t capacity;

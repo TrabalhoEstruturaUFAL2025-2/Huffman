@@ -50,7 +50,9 @@ int vector_push(Vector *vector, void *value) {
 
     // Dobra o tamanho caso precise
     if (vector->size >= vector->capacity) {
-        size_t new_capacity = (vector->capacity == 0) ? 8 : vector->capacity * 2;
+        size_t new_capacity = (vector->capacity == 0) ? 
+			VECTOR_DEFAULT_CAPACITY : 
+			vector->capacity * 2;
         void *new_buffer = realloc(vector->buffer, new_capacity * vector->element_size);
         if (!new_buffer) {
             return -1;
