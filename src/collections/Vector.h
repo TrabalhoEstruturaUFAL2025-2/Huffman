@@ -3,6 +3,7 @@
 #define VECTOR_H
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct Vector {
 	size_t size;
@@ -25,6 +26,6 @@ int vector_get(Vector *vector, size_t index, void **value);
 int vector_set(Vector *vector, size_t index, void *value);
 
 // Pushes value to the end of the vector
-int vector_push(Vector *vector, void **value);
+int vector_push(Vector *vector, void *value);
 
 #endif // VECTOR_H
