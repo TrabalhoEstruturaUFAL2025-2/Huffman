@@ -67,3 +67,11 @@ int vector_push(Vector *vector, void *value) {
     vector->size++;
     return 0;
 }
+
+int vector_clear(Vector *vector) {
+	if (!vector) {
+		return -1;
+	}
+	vector->size = 0;
+	return 0;
+}

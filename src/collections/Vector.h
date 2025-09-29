@@ -30,4 +30,6 @@ int vector_set(Vector *vector, size_t index, void *value);
 // Pushes value to the end of the vector
 int vector_push(Vector *vector, void *value);
 
+int vector_clear(Vector *vector);
+
 #endif // VECTOR_H
