@@ -80,7 +80,7 @@ void priority_queue_enqueue(PriorityQueue *queue, void *value, int priority) {
 
     // Vai subindo até voltar a ser um min-heap
     int parent_index = (index - 1) / 2;
-    while (index > 0 && queue->nodes[index].priority < queue->nodes[parent_index].priority) {
+    while (index > 0 && queue->nodes[index].priority <= queue->nodes[parent_index].priority) {
         swap_nodes(&queue->nodes[index], &queue->nodes[parent_index]);
         index = parent_index;
         parent_index = (index - 1) / 2;
