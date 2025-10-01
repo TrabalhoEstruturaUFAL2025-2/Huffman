@@ -1,5 +1,7 @@
 
 #include "Huffman.h"
+#include "collections/PriorityQueue.h"
+#include <stdio.h>
 
 Vector *huffman_arena_new() {
 	return vector_new(sizeof(HuffmanNode));
@@ -72,4 +74,36 @@ int huffman_nodes_from_bytes(Vector *node_arena, unsigned char *bytes, size_t si
 	}
 
 	return byte_count;
+}
+
+HuffmanNode *huffman_build_tree(Vector *node_arena) {
+	PriorityQueue *queue = priority_queue_new();
+
+	for (size_t i = 0; i < node_arena->size; i++) {
+		HuffmanNode *node;
+		vector_get(node_arena, i, (void **) &node);
+		printf("%c(%d)\n", node->symbol, node->frequency);
+		priority_queue_enqueue(queue, node, node->frequency);
+	}
+
+	while (priority_queue_size(queue) > 1) {
+		HuffmanNode *left, *right, *internal;
+
+		priority_queue_dequeue(queue, (void **) &left);
+		priority_queue_dequeue(queue, (void **) &right);
+
+		printf("LEFT %c(%d)\n", left->symbol, left->frequency);
+		printf("RIGHT %c(%d)\n", right->symbol, right->frequency);
+		puts("====");
+
+
+		internal = huffman_arena_new_internal_node(node_arena, left, right);
+		priority_queue_enqueue(queue, internal, internal->frequency);
+	}
+
+	HuffmanNode *root;
+	priority_queue_dequeue(queue, (void **) &root);
+	priority_queue_free(queue);
+
+	return root;
 }

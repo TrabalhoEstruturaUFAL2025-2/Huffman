@@ -5,8 +5,40 @@
 
 #include "Huffman.h"
 #include "Vector.h"
+#include "PriorityQueue.h"
 
 Vector *ARENA = NULL;
+
+void print_tree(HuffmanNode *n, int level) {
+	if (!n) {
+		printf("NULL\n");
+	}
+
+	for (int i = 0; i < level; i++) {
+		putchar(' ');
+	}
+
+	if (n->left == NULL && n->right == NULL) {
+		printf("%c(%d)\n", n->symbol, n->frequency);
+	} else {
+		printf("%c(%d)\n", n->symbol, n->frequency);
+		print_tree(n->left, level + 4);
+		print_tree(n->right, level + 4);
+	}
+}
+
+void tree_flatten(HuffmanNode *n, HuffmanNode *buffer, size_t size, int *top) {
+	buffer[*top] = *n;
+	*top += 1;
+
+	if (n->left != NULL) {
+		tree_flatten(n->left, buffer, size, top);
+	}
+
+	if (n->right != NULL) {
+		tree_flatten(n->right, buffer, size, top);
+	}
+}
 
 void setUp(void)
 {
@@ -87,6 +119,23 @@ void test_Huffman_arena_gets_frequencies(void)
 	}
 
 	TEST_ASSERT_EQUAL_INT(3, found);
+}
+
+void test_Huffman_builds_tree(void) {
+	vector_clear(ARENA);
+
+	char *text = "abcabcabcedfaeb*||";
+	char message[64];
+
+	int bytes = huffman_nodes_from_bytes(
+		ARENA, 
+		(unsigned char *) text, 
+		strlen(text)
+	);
+	TEST_ASSERT_EQUAL_INT(8, bytes);
+
+	HuffmanNode *root = huffman_build_tree(ARENA);
+	print_tree(root, 0);
 }
 
 #endif // TEST
