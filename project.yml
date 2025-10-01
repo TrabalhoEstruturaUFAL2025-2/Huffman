@@ -15,7 +15,7 @@
   :use_mocks: TRUE
   :use_test_preprocessor: :none  # options are :none, :mocks, :tests, or :all
   :use_deep_preprocessor: :none  # options are :none, :mocks, :tests, or :all
-  :use_backtrace: :simple        # options are :none, :simple, or :gdb
+  :use_backtrace: :gdb # options are :none, :simple, or :gdb
   :use_decorators: :auto         # decorate Ceedling's output text. options are :auto, :all, or :none
 
   # tweak the way ceedling handles automatic tasks
