@@ -82,7 +82,6 @@ HuffmanNode *huffman_build_tree(Vector *node_arena) {
 	for (size_t i = 0; i < node_arena->size; i++) {
 		HuffmanNode *node;
 		vector_get(node_arena, i, (void **) &node);
-		printf("%c(%d)\n", node->symbol, node->frequency);
 		priority_queue_enqueue(queue, node, node->frequency);
 	}
 
@@ -91,11 +90,6 @@ HuffmanNode *huffman_build_tree(Vector *node_arena) {
 
 		priority_queue_dequeue(queue, (void **) &left);
 		priority_queue_dequeue(queue, (void **) &right);
-
-		printf("LEFT %c(%d)\n", left->symbol, left->frequency);
-		printf("RIGHT %c(%d)\n", right->symbol, right->frequency);
-		puts("====");
-
 
 		internal = huffman_arena_new_internal_node(node_arena, left, right);
 		priority_queue_enqueue(queue, internal, internal->frequency);
