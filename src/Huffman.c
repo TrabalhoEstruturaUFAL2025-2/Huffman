@@ -51,6 +51,22 @@ HuffmanNode *huffman_arena_new_internal_node(Vector *node_arena, HuffmanNode *le
 	return node;
 }
 
+int huffman_nodes_from_table(Vector *node_arena, unsigned char table[256]) {
+	HuffmanNode leaf;
+	int byte_count = 0;
+
+	for (int i = 0; i < 256; i++) {
+		if (table[i] > 0) {
+			byte_count++;
+			if (huffman_arena_new_leaf(node_arena, i, table[i]) == NULL) {
+				return -1;
+			}
+		}
+	}
+
+	return byte_count;
+}
+
 
 int huffman_nodes_from_bytes(Vector *node_arena, unsigned char *bytes, size_t size) {
 	int err;

@@ -164,5 +164,7 @@ HuffmanNode *huffman_arena_new_internal_node(Vector *node_arena, HuffmanNode *le
  */
 int huffman_nodes_from_bytes(Vector *node_arena, unsigned char *bytes, size_t size);
 
+int huffman_nodes_from_table(Vector *node_arena, unsigned char table[256]);
+
 HuffmanNode *huffman_build_tree(Vector *node_arena);
 #endif // HUFFMANNODE_H
