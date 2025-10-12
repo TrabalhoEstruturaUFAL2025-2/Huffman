@@ -45,4 +45,20 @@ void test_bin_utils_nth_bit(void)
 	TEST_ASSERT_EQUAL_INT(NTH_BIT(0b11111110, 7), 0);
 }
 
+void test_bin_utils_writes_uint16_bits(void)
+{
+	uint8_t buffer [2] = {
+		0x00, 0x00
+	};
+
+
+	write_bits_int16(0xFFFF, 12, buffer, 4);
+
+	printf("buffer[0]: %d\n", buffer[0]);
+	printf("buffer[1]: %d\n", buffer[1]);
+
+	TEST_ASSERT_EQUAL_INT(0x0F, buffer[0]);
+	TEST_ASSERT_EQUAL_INT(0xFF, buffer[1]);
+}
+
 #endif // TEST
