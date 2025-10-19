@@ -4,45 +4,46 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define INTERNAL_MARKER '*'
-#define LEAF_MARKER 1
+#define ESCAPE_SYMBOL '\\'
+#define INTERNAL_SYMBOL '*'
 
 int serialize_recursive(HuffmanNode *node, uint8_t *buffer, size_t len, size_t *i) {
+	printf("index: %d\n", (int) *i);
+	static char *ERROR = "serialization error: maximum buffer size exceeded\n";
+
 	if (node == NULL) {
 		return 0;
 	}
 
-	printf("index: %d\n", (int) *i);
 
-	if (*i >= len) {
-		fprintf(stderr, "serialization error: maximum buffer size exceeded\n");
-		return -1;
-	}
-
-	buffer[*i] = INTERNAL_MARKER;
-	(*i)++;
-
-	if (node->left != NULL) {
-		serialize_recursive(node->left, buffer, len, i);
-	} 
-
-	if (node->right != NULL) {
-		serialize_recursive(node->right, buffer, len, i);
-	}
+	if (*i >= len) goto error;
 
 	if (node->left == NULL && node->right == NULL) {
-		buffer[(*i - 1)] = LEAF_MARKER;
-		
-		if (*i >= len) {
-			fprintf(stderr, "serialization error: maximum buffer size exceeded\n");
-			return -1;
+		if (node->symbol == ESCAPE_SYMBOL || node->symbol == INTERNAL_SYMBOL) {
+			buffer[(*i)++] = ESCAPE_SYMBOL;
+			if (*i >= len) goto error;
 		}
 
-		buffer[*i] = node->symbol;
-		(*i)++;
+		buffer[(*i)++] = node->symbol;
+
+		return 0;
+	} else  {
+		buffer[(*i)++] = INTERNAL_SYMBOL;
+
+		if (node->left != NULL) {
+			if (serialize_recursive(node->left, buffer, len, i) < 0) goto error;
+		} 
+
+		if (node->right != NULL) {
+			if (serialize_recursive(node->right, buffer, len, i) < 0) goto error;
+		}
+
+		return 0;
 	}
 
-	return 0;
+	error:
+		fprintf(stderr, "%s", ERROR);
+		return -1;
 }
 
 int serialize_tree(HuffmanNode *root, uint8_t *buffer, size_t buffer_size) {
@@ -54,24 +55,21 @@ int serialize_tree(HuffmanNode *root, uint8_t *buffer, size_t buffer_size) {
 }
 
 HuffmanNode *deserialize_recursive(Vector *node_arena, uint8_t *buffer, size_t len, size_t *i) {
-	if (*i >= len) {
-		fprintf(stderr, "desserialization error: unexpected end of data\n");
-		return NULL;
-	}
+	static char *ERROR = "desserialization error: unexpected end of data\n";
 
-	uint8_t marker = buffer[*i];
-	(*i)++;
+	if (*i >= len) goto error;
+	uint8_t symbol = buffer[(*i)++];
+	printf("index: %d, sym: %c\n", (int) *i - 1, symbol);
 
-	if (marker == LEAF_MARKER) {
-		if (*i >= len) {
-			fprintf(stderr, "desserialization error: unexpected end of data\n");
-			return NULL;
+	if (symbol != INTERNAL_SYMBOL) {
+		if (symbol == ESCAPE_SYMBOL) {
+			if (*i >= len) goto error;
+			symbol = buffer[(*i)++];
+			printf("index: %d, sym: %c\n", (int) *i - 1, symbol);
 		}
 
-		char symbol = buffer[*i];
-		(*i)++;
 		return huffman_arena_new_leaf(node_arena, symbol, 0);
-	} else if (marker == INTERNAL_MARKER) {
+	} else {
 		HuffmanNode *left = deserialize_recursive(node_arena, buffer, len, i);
 		if (left == NULL) {
 			return NULL;
@@ -83,10 +81,11 @@ HuffmanNode *deserialize_recursive(Vector *node_arena, uint8_t *buffer, size_t l
 		}
 
 		return huffman_arena_new_internal_node(node_arena, left, right);
-	} else {
-		fprintf(stderr, "desserialization error: unexpected marker 0x%02X\n", marker);
-		return NULL;
 	}
+	
+	error:
+		fprintf(stderr, "%s", ERROR);
+		return NULL;
 }
 
 HuffmanNode *deserialize_tree(Vector *node_arena, uint8_t *buffer, size_t len) {

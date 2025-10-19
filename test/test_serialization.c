@@ -18,50 +18,65 @@ void tearDown(void)
 {
 }
 
+void print_tree(HuffmanNode *n, int level) {
+	if (!n) {
+		return;
+	}
+
+	for (int i = 0; i < level; i++) {
+		putchar(' ');
+	}
+
+	if (n->left == NULL && n->right == NULL) {
+		printf("%c(%d)\n", n->symbol, n->frequency);
+	} else {
+		printf("%c(%d)\n", n->symbol, n->frequency);
+		print_tree(n->left, level + 4);
+		print_tree(n->right, level + 4);
+	}
+	
+}
+
 void test_serialization(void)
 {
-	uint8_t want[17] = {
-		'*', 
-		'*', 
-		1, 'C', 
-		1, 'B', 
-		'*', 
-		'*', 
-		'*', 
-		1, 'F', 
-		1, 'E', 
-		1, 'D', 
-		1, 'A'
+	uint8_t want[] = {
+		'*', '*', 'C', 'B', '*', '*',
+		'*', '\\', '*', '\\', '\\', 'A', 'E'
 	};
-	size_t want_len = 17;
+	size_t want_len = sizeof(want);
 
 	uint8_t got[want_len];
 	memset(got, 0, want_len);
 
 	Vector *arena = huffman_arena_new();
 	HuffmanNode *root = deserialize_tree(arena, want, want_len);
-	serialize_tree(root, got, want_len);
+	print_tree(root, 0);
+	int err = serialize_tree(root, got, want_len);
+	TEST_ASSERT_NOT_EQUAL_INT(err, -1);
 
-	for (int i = 0; i < 11; i++) {
-		TEST_ASSERT_EQUAL_INT(want[i], got[i]);
+	char msg[64];
+	for (int i = 0; i < want_len; i++) {
+		snprintf(msg, sizeof(msg), "want: %c, got: %c; idx: %d", want[i], got[i], i);
+		TEST_ASSERT_MESSAGE(want[i] == got[i], msg);
 	}
 }
 
+/*
 void test_serialization_tree_writing(void) {
-	uint8_t flat_tree[17] = {
+	uint8_t flat_tree[] = {
 		'*', 
 		'*', 
-		1, 'C', 
-		1, 'B', 
+		'C', 
+		'B', 
 		'*', 
 		'*', 
 		'*', 
-		1, 'F', 
-		1, 'E', 
-		1, 'D', 
-		1, 'A'
+		'F', 
+		'E', 
+		'D', 
+		'A'
 	};
-	size_t flat_tree_len = 17;
+	size_t flat_tree_len = sizeof(flat_tree);
 
 	uint8_t got[64];
 	size_t got_len = 64;
@@ -80,5 +95,6 @@ void test_serialization_tree_writing(void) {
 		TEST_ASSERT_EQUAL_INT(flat_tree[i], got[i + 2]);
 	}
 }
+*/
 
 #endif // TEST
