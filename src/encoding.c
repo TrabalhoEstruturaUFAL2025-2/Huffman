@@ -7,18 +7,24 @@
 
 
 void _encoder_dfs(Encoder *encoder, HuffmanNode *node, uint8_t byte, int level) {
-	if (node->left == NULL && node->right == NULL) {
+	if (IS_LEAF(node)) {
+		// Folha encontrada
+		// Passe o byte resultante e a profundidade na arvore
 		uint8_t s = node->symbol;
 		encoder->table[s].bits = byte;
 		encoder->table[s].length = level;
 		printf("symbol: %c, byte: %x\n", s, byte);
 	} else {
+		// Se for para esquerda, move todos os bits para a esquerda
 		_encoder_dfs(encoder, node->left, (byte << 1), level + 1);
+		// Caso direita, move todos para esquerda e põe o primeiro bit (da direita pra
+		// esquerda como 1)
 		_encoder_dfs(encoder, node->right, (byte << 1) | 1 , level + 1);
 	}
 }
 
 void init_encoder(Encoder *encoder, HuffmanNode *root) {
+	// Zera a tabela inicialmente. Caso contrário, pode conter dados aleatórios
 	memset(encoder->table, 0, sizeof(struct Codeword) * 256);
 	_encoder_dfs(encoder, root, 0, 0);
 }
@@ -37,17 +43,17 @@ int encoder_write(
 		struct Codeword *codeword, 
 		uint8_t *buffer, 
 		size_t buffer_size,
-		int offset
+		int bit_offset
 	) {
 	if (codeword == NULL) {
 		return -1;
 	}
 
-	if (offset + codeword->length > buffer_size * BYTE_SIZE) {
+	if (bit_offset + codeword->length > buffer_size * BYTE_SIZE) {
 		return 0;
 	}
 
-	write_bits(codeword->bits, codeword->length, buffer, offset);
+	write_bits(codeword->bits, codeword->length, buffer, bit_offset);
 
 	return codeword->length;
 }
@@ -72,22 +78,11 @@ int decoder_feed(Decoder *decoder, uint8_t byte) {
 	return 0;
 }
 
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)  \
-  ((byte) & 0x80 ? '1' : '0'), \
-  ((byte) & 0x40 ? '1' : '0'), \
-  ((byte) & 0x20 ? '1' : '0'), \
-  ((byte) & 0x10 ? '1' : '0'), \
-  ((byte) & 0x08 ? '1' : '0'), \
-  ((byte) & 0x04 ? '1' : '0'), \
-  ((byte) & 0x02 ? '1' : '0'), \
-  ((byte) & 0x01 ? '1' : '0') 
 
-int decoder_consume(Decoder *decoder, uint8_t *out) {
+int decoder_consume(Decoder *decoder, uint8_t *out) {	
 	while (decoder->curr_bit < BYTE_SIZE) {
-		printf(BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(decoder->byte));
+		// Nth bit -> extrai o enésimo bit
 		uint8_t bit = NTH_BIT(decoder->byte, decoder->curr_bit);
-		printf("\nbit %d number %d\n", bit, decoder->curr_bit);
 
 		if (bit) {
 			decoder->current_node = decoder->current_node->right;
