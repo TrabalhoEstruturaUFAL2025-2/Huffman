@@ -16,7 +16,6 @@ typedef struct Encoder {
 	struct Codeword table[256];
 } Encoder;
 
-void _encoder_dfs(Encoder *encoder, HuffmanNode *node, uint8_t byte, int level);
 
 void init_encoder(Encoder *encoder, HuffmanNode *root);
 

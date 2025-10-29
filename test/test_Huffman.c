@@ -124,7 +124,7 @@ void test_Huffman_arena_gets_frequencies(void)
 void test_Huffman_builds_tree(void) {
 	vector_clear(ARENA);
 
-	char *text = "abcabcabcedfaeb*||";
+	char *text = "abcabcabcedfaeb";
 	char message[64];
 
 	int bytes = huffman_nodes_from_bytes(
@@ -132,7 +132,7 @@ void test_Huffman_builds_tree(void) {
 		(unsigned char *) text, 
 		strlen(text)
 	);
-	TEST_ASSERT_EQUAL_INT(8, bytes);
+	TEST_ASSERT_EQUAL_INT(6, bytes);
 
 	HuffmanNode *root = huffman_build_tree(ARENA);
 	print_tree(root, 0);

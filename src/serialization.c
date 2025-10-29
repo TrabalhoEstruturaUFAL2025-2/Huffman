@@ -8,7 +8,6 @@
 #define INTERNAL_SYMBOL '*'
 
 int serialize_recursive(HuffmanNode *node, uint8_t *buffer, size_t len, size_t *i) {
-	printf("index: %d\n", (int) *i);
 	static char *ERROR = "serialization error: maximum buffer size exceeded\n";
 
 	if (node == NULL) {
@@ -117,7 +116,7 @@ int write_tree(struct TreeData *data, uint8_t *buffer, size_t len, size_t offset
 		return -1;
 	}
 	
-	buffer[offset] = (uint8_t) (data->size >> 8);
+	buffer[offset] = (uint8_t) ((data->size >> 8) | (data->trash << 5));
 	buffer[offset + 1] = (uint8_t) (data->size & 0xFF);
 
 	int bytes = serialize_tree(data->root, buffer + 2, len - 2);
