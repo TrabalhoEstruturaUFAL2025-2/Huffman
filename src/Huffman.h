@@ -164,7 +164,82 @@ HuffmanNode *huffman_arena_new_internal_node(Vector *node_arena, HuffmanNode *le
  */
 int huffman_nodes_from_bytes(Vector *node_arena, unsigned char *bytes, size_t size);
 
-int huffman_nodes_from_table(Vector *node_arena, unsigned char table[256]);
 
-HuffmanNode *huffman_build_tree(Vector *node_arena);
+/**
+ * @brief Cria nós folha a partir de um array de bytes.
+ * 
+ * @details Analisa uma tabela em formato de array contendo a frequência de cada
+ * byte possível e cria um nó folha para cada byte distinto. Semelhante a huffman_nodes_from_bytes
+ * porém delegando a etapa de contar a frequência dos bytes no arquivo
+ * 
+ * @param node_arena Arena de memória onde os nós serão alocados. Não pode ser NULL.
+ * @param bytes Tabela de frequência a ser analisada. Não pode ser NULL.
+ * @param size Tamanho do array de bytes. Deve ser maior que 0.
+ * 
+ * @return Número de nós folha criados (valor não-negativo) em caso de sucesso,
+ *         representando a quantidade de bytes com frequência > 0 no array.
+ *         Retorna um valor negativo em caso de erro.
+ * 
+ * @note Esta função criará no máximo 256 nós folha (um para cada possível
+ *       valor de byte de 0 a 255).
+ * 
+ * @see huffman_arena_new_leaf()
+ * @see huffman_nodes_from_bytes()
+ */
+ int huffman_nodes_from_table(Vector *node_arena, unsigned char table[256]);
+
+/**
+ * @brief Constrói a árvore de Huffman a partir dos nós folha na arena.
+ * 
+ * @details Esta função implementa o algoritmo de Huffman para construir uma
+ * árvore binária ótima de codificação. O algoritmo funciona da seguinte forma:
+ * 1. Insere todos os nós folha existentes na arena em uma fila de prioridade,
+ *    ordenados por frequência crescente.
+ * 2. Repetidamente remove os dois nós de menor frequência da fila.
+ * 3. Cria um novo nó interno com esses dois nós como filhos.
+ * 4. Insere o novo nó interno de volta na fila.
+ * 5. Repete os passos 2-4 até restar apenas um nó na fila, que será a raiz.
+ * 
+ * A árvore resultante garante que símbolos mais frequentes tenham códigos
+ * mais curtos, otimizando a compressão de dados.
+ * 
+ * @param node_arena Arena de memória contendo os nós folha previamente criados
+ *                   por huffman_nodes_from_bytes() ou huffman_nodes_from_table().
+ *                   Não pode ser NULL e deve conter ao menos um nó folha.
+ * 
+ * @return Ponteiro para o nó raiz da árvore de Huffman construída em caso de
+ *         sucesso, ou NULL em caso de erro (arena NULL, arena vazia, ou falha
+ *         de alocação durante a construção).
+ * 
+ * @note A arena deve conter apenas nós folha antes de chamar esta função.
+ *       Nós internos serão criados e adicionados à arena durante a execução.
+ * 
+ * @note Para um arquivo com N símbolos distintos, a árvore resultante terá:
+ *       - N nós folha (já existentes na arena)
+ *       - N-1 nós internos (criados por esta função)
+ *       - Total de 2N-1 nós
+ * 
+ * @note Caso especial: se houver apenas um símbolo distinto no arquivo,
+ *       a função deve tratar este caso criando uma árvore mínima válida.
+ * 
+ * @warning Não modifique a arena entre a criação dos nós folha e a chamada
+ *          desta função, pois isso pode resultar em comportamento indefinido.
+ * 
+ * @example
+ * @code
+ * Vector *arena = huffman_arena_new();
+ * unsigned char data[] = "AABBCCCC";
+ * huffman_nodes_from_bytes(arena, data, 8);
+ * HuffmanNode *root = huffman_build_tree(arena);
+ * if (root != NULL) {
+ *     // Árvore construída com sucesso
+ *     // root->frequency será 8 (soma de todas as frequências)
+ * }
+ * huffman_arena_free(arena);
+ * @endcode
+ * 
+ * @see huffman_nodes_from_bytes()
+ * @see huffman_nodes_from_table()
+ * @see huffman_arena_new_internal_node()
+ */HuffmanNode *huffman_build_tree(Vector *node_arena);
 #endif // HUFFMANNODE_H
