@@ -9,5 +9,6 @@
 
 int write_bits(uint8_t bits, int num_bits, uint8_t *buffer, int offset);
 int write_bits_int16(uint16_t B, int n, uint8_t *buffer, int offset);
+int write_bits_from_uint32(uint32_t B, int n, uint8_t *buffer, int offset);
 
 #endif // BIN_UTILS_H
