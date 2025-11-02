@@ -74,6 +74,7 @@ int huffman_nodes_from_bytes(Vector *node_arena, unsigned char *bytes, size_t si
 	memset(table, 0, sizeof(table));
 
 	for (size_t i = 0; i < size; i++) {
+		printf("byte %d\n", bytes[i]);
 		table[bytes[i]]++;
 	}
 

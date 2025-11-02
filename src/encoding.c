@@ -1,19 +1,25 @@
 
 #include "encoding.h"
 #include "bin_utils.h"
+#include <stdint.h>
 #include <stdio.h>
 
 #define IS_LEAF(node) (node->left == NULL && node->right == NULL)
 
+void _encoder_dfs(Encoder *encoder, HuffmanNode *node, uint32_t byte, int level) {
+	for (int i = 0; i < level; i++) {
+		printf(" -- ");		
+	}
 
-void _encoder_dfs(Encoder *encoder, HuffmanNode *node, uint8_t byte, int level) {
+	printf("%c", node->symbol);
+	putchar('\n');
+
 	if (IS_LEAF(node)) {
 		// Folha encontrada
 		// Passe o byte resultante e a profundidade na arvore
 		uint8_t s = node->symbol;
 		encoder->table[s].bits = byte;
 		encoder->table[s].length = level;
-		printf("symbol: %c, byte: %x\n", s, byte);
 	} else {
 		// Se for para esquerda, move todos os bits para a esquerda
 		_encoder_dfs(encoder, node->left, (byte << 1), level + 1);
@@ -53,7 +59,7 @@ int encoder_write(
 		return 0;
 	}
 
-	write_bits(codeword->bits, codeword->length, buffer, bit_offset);
+	write_bits_from_uint32(codeword->bits, codeword->length, buffer, bit_offset);
 
 	return codeword->length;
 }

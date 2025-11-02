@@ -76,7 +76,7 @@ struct TreeData {
  * @see serialize_tree()
  * @see write_tree()
  */
-struct TreeData get_tree_data(HuffmanNode *root);
+struct TreeData tree_data_from_root(HuffmanNode *root);
 
 /**
  * @brief Serializa a árvore de Huffman em um buffer.

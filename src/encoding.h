@@ -17,15 +17,15 @@
 struct Codeword {
     /**
      * @brief Bits que compõem a palavra-código.
-     * @details Armazena até 8 bits da palavra-código em um único byte.
+     * @details Armazena até 32 bits da palavra-código
      * Os bits são lidos/escritos de acordo com a convenção definida em bin_utils.h.
      */
-    uint8_t bits;
+    uint32_t bits;
     
     /**
      * @brief Comprimento da palavra-código em bits.
      * @details Indica quantos bits são válidos em 'bits'. Varia de 0 (não inicializado)
-     * até 8 (palavra-código completa de 8 bits).
+     * até 32 (palavra-código completa de 32 bits).
      */
     int length;
 };

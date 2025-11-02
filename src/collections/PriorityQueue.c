@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 // typedef struct {
 //     int priority;
@@ -18,8 +19,9 @@
 PriorityQueue *priority_queue_new() {
     PriorityQueue *queue = (PriorityQueue*) malloc(sizeof(PriorityQueue));
     queue->size = 0;
-    queue->capacity = 256;
-    queue->nodes = (Node*)malloc(queue->capacity * sizeof(Node));
+    queue->capacity = 512;
+    queue->nodes = (Node*) malloc(queue->capacity * sizeof(Node));
+    memset(queue->nodes, 0, queue->capacity);
     
     if (!queue->nodes) {
         free(queue);
@@ -33,7 +35,12 @@ PriorityQueue *priority_queue_new() {
 // as estruturas criadas por ela
 void priority_queue_free(PriorityQueue *queue) {
     if (queue) {
+        puts("Hello");
+        //for (int i = 0; i < queue->capacity; i++) {
+            // printf("INDEX/POINTER: %d / %x\n", i, queue->nodes[i].value);
+        //}
         free(queue->nodes);
+        puts("queue");
         free(queue);
     }
 }
@@ -66,8 +73,11 @@ void min_heapify(PriorityQueue *queue, int i) {
 
 // Insere um item de qualquer tipo na fila
 void priority_queue_enqueue(PriorityQueue *queue, void *value, int priority) {
+    if (queue->size >= queue->capacity) puts("TRAAASH ENQ");
+    // printf("%d %d %d\n", priority_queue_size(queue), queue->capacity, sizeof(Node));
     // Verificando se a capacidade é suficiente, caso não, dobra a capcidade
     if (queue->size == queue->capacity) {
+        printf("queue");
         queue->capacity *= 2;
         queue->nodes = (Node*) realloc(queue->nodes, queue->capacity * sizeof(Node));
     }
@@ -81,6 +91,7 @@ void priority_queue_enqueue(PriorityQueue *queue, void *value, int priority) {
     // Vai subindo até voltar a ser um min-heap
     int parent_index = (index - 1) / 2;
     while (index > 0 && queue->nodes[index].priority < queue->nodes[parent_index].priority) {
+        //printf("index %d\n", index);
         swap_nodes(&queue->nodes[index], &queue->nodes[parent_index]);
         index = parent_index;
         parent_index = (index - 1) / 2;
@@ -95,6 +106,7 @@ void priority_queue_enqueue(PriorityQueue *queue, void *value, int priority) {
 // NOTA: o item com MENOR NÚMERO de prioridade deve ser removido
 //
 int priority_queue_dequeue(PriorityQueue *queue, void **value) {
+    if (queue->size < 0) puts("TRAAASH DEQ");
     if (queue->size == 0) {
         return -1;
     }

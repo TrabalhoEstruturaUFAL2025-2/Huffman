@@ -4,9 +4,9 @@ Vector *vector_new(size_t element_size) {
     Vector *vector = (Vector*) malloc(sizeof(Vector));
 
     vector->size = 0;
-    vector->capacity = 0;
     vector->element_size = element_size;
-    vector->buffer = NULL;
+    vector->capacity = VECTOR_DEFAULT_CAPACITY;
+    vector->buffer = malloc(vector->capacity * element_size);
 
     return vector;
 }
@@ -50,15 +50,12 @@ int vector_push(Vector *vector, void *value) {
 
     // Dobra o tamanho caso precise
     if (vector->size >= vector->capacity) {
-        size_t new_capacity = (vector->capacity == 0) ? 
-			VECTOR_DEFAULT_CAPACITY : 
-			vector->capacity * 2;
-        void *new_buffer = realloc(vector->buffer, new_capacity * vector->element_size);
+        vector->capacity *= 2;
+        void *new_buffer = realloc(vector->buffer, vector->capacity  * vector->element_size);
         if (!new_buffer) {
             return -1;
         }
         vector->buffer = new_buffer;
-        vector->capacity = new_capacity;
     }
 
     // Insere no final do vetor
