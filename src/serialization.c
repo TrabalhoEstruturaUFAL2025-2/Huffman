@@ -59,13 +59,11 @@ HuffmanNode *deserialize_recursive(Vector *node_arena, uint8_t *buffer, size_t l
 
 	if (*i >= len) goto error;
 	uint8_t symbol = buffer[(*i)++];
-	// printf("index: %d, sym: %c\n", (int) *i - 1, symbol);
 
 	if (symbol != INTERNAL_SYMBOL) {
 		if (symbol == ESCAPE_SYMBOL) {
 			if (*i >= len) goto error;
 			symbol = buffer[(*i)++];
-			// printf("index: %d, sym: %c\n", (int) *i - 1, symbol);
 		}
 
 		return huffman_arena_new_leaf(node_arena, symbol, 0);
@@ -110,7 +108,6 @@ int write_tree(struct TreeData *data, uint8_t *buffer, size_t len, size_t offset
 	}
 
 	data->size = bytes;
-	printf("SIZE: %d\n", data->size);
 	
 	buffer[offset] = (uint8_t) ((data->size >> 8) | (data->trash << 5));
 	buffer[offset + 1] = (uint8_t) (data->size & 0xFF);
@@ -121,7 +118,6 @@ int write_tree(struct TreeData *data, uint8_t *buffer, size_t len, size_t offset
 struct TreeData read_tree(Vector *node_arena, uint8_t *buffer, size_t len, size_t offset) {
 	struct TreeData data;
 	data.size = ((buffer[offset] & 0b00011111) << 8) | buffer[offset + 1];
-	printf("TREE SIZE: %d\n", data.size);
 	data.trash = buffer[offset] >> (BYTE_SIZE - 3);
 	data.root = deserialize_tree(node_arena, buffer + 2, data.size);
 	return data;

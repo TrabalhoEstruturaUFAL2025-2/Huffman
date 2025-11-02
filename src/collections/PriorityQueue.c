@@ -35,12 +35,7 @@ PriorityQueue *priority_queue_new() {
 // as estruturas criadas por ela
 void priority_queue_free(PriorityQueue *queue) {
     if (queue) {
-        puts("Hello");
-        //for (int i = 0; i < queue->capacity; i++) {
-            // printf("INDEX/POINTER: %d / %x\n", i, queue->nodes[i].value);
-        //}
         free(queue->nodes);
-        puts("queue");
         free(queue);
     }
 }
@@ -74,10 +69,8 @@ void min_heapify(PriorityQueue *queue, int i) {
 // Insere um item de qualquer tipo na fila
 void priority_queue_enqueue(PriorityQueue *queue, void *value, int priority) {
     if (queue->size >= queue->capacity) puts("TRAAASH ENQ");
-    // printf("%d %d %d\n", priority_queue_size(queue), queue->capacity, sizeof(Node));
     // Verificando se a capacidade é suficiente, caso não, dobra a capcidade
     if (queue->size == queue->capacity) {
-        printf("queue");
         queue->capacity *= 2;
         queue->nodes = (Node*) realloc(queue->nodes, queue->capacity * sizeof(Node));
     }
@@ -91,7 +84,6 @@ void priority_queue_enqueue(PriorityQueue *queue, void *value, int priority) {
     // Vai subindo até voltar a ser um min-heap
     int parent_index = (index - 1) / 2;
     while (index > 0 && queue->nodes[index].priority < queue->nodes[parent_index].priority) {
-        //printf("index %d\n", index);
         swap_nodes(&queue->nodes[index], &queue->nodes[parent_index]);
         index = parent_index;
         parent_index = (index - 1) / 2;

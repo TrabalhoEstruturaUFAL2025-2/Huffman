@@ -33,14 +33,6 @@ HuffmanNode *huffman_tree_from_file(Vector *arena, FILE *input) {
 	return huffman_build_tree(arena);
 }
 
-void print_bits(unsigned char byte, int bits) {
-    for (int i = bits - 1; i >= 0; i--) {
-        // Check if the i-th bit is set using bitwise AND with a mask
-        printf("%d ", (byte >> i) & 1);
-    }
-    printf("\n");
-}
-
 int huffman_encode_file(HuffmanNode *root, FILE *input, FILE *output) {
 	int bytes;
 
@@ -63,15 +55,10 @@ int huffman_encode_file(HuffmanNode *root, FILE *input, FILE *output) {
 
 	byte_offset = tree_data_size;
 	bit_offset = tree_data_size * 8;
-	printf("TREE DATA SIZE: %d\n", byte_offset);
-	printf("OFFSET: %d\n", byte_offset);
 
 	while ((bytes = fread(in, sizeof(uint8_t), FILE_BUFFER_LEN, input)) > 0) {
 		for (int i = 0; i < bytes; i++) {
 			struct Codeword *cw = encoder_get_codeword(&encoder, in[i]);
-			printf("BYTE: %c - OFFSET: %d  - CODEWORD: %d / ", in[i], byte_offset, cw->length);
-			print_bits(cw->bits, cw->length);
-			print_bits(cw->bits, 8);
 			written = encoder_write(&encoder, cw, out, FILE_BUFFER_LEN, bit_offset);
 
 			if (written > 0) {
@@ -96,11 +83,9 @@ int huffman_encode_file(HuffmanNode *root, FILE *input, FILE *output) {
 	}
 
 	if (bit_offset > 0 && bytes < FILE_BUFFER_LEN) {
-		printf("WRITTEN END: %d\n", byte_offset + 1);
 		fwrite(out, sizeof(uint8_t), byte_offset + 1, output);
 		memset(out, 0, sizeof(uint8_t));
 	}
-
 
 	fseek(output, 0, SEEK_SET);
 
@@ -160,15 +145,12 @@ int huffman_decompress_file(FILE *input, FILE *output) {
 
 		for (; byte_idx < bytes; byte_idx++) {
 			decoder_feed(&decoder, in[byte_idx]);
-			// printf("BYTE: ");
-			//print_bits(in[byte_idx], 8);
 
 			while (decoder_consume(&decoder, &byte)) {
 				if (end_reached && byte_idx == bytes - 1 && decoder.curr_bit == BYTE_SIZE - data.trash) {
 					break;
 				}
 					
-				printf(" %c ", byte);
 				out[out_idx++] = byte;
 
 				if (out_idx >= FILE_BUFFER_LEN) {

@@ -7,13 +7,6 @@
 #define IS_LEAF(node) (node->left == NULL && node->right == NULL)
 
 void _encoder_dfs(Encoder *encoder, HuffmanNode *node, uint32_t byte, int level) {
-	for (int i = 0; i < level; i++) {
-		printf(" -- ");		
-	}
-
-	printf("%c", node->symbol);
-	putchar('\n');
-
 	if (IS_LEAF(node)) {
 		// Folha encontrada
 		// Passe o byte resultante e a profundidade na arvore
