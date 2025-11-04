@@ -15,8 +15,8 @@
 HuffmanNode *huffman_tree_from_file(Vector *arena, FILE *input) {
 	int bytes;
 
-	uint8_t table[256];
-	memset(table, 0, sizeof(uint8_t) * 256);
+	int table[256];
+	memset(table, 0, sizeof(int) * 256);
 
 	uint8_t in[FILE_BUFFER_LEN];
 	memset(in, 0, sizeof(in));
@@ -41,8 +41,8 @@ int huffman_encode_file(HuffmanNode *root, FILE *input, FILE *output) {
 	uint8_t in[FILE_BUFFER_LEN], out[FILE_BUFFER_LEN];
 	memset(out, 0, sizeof(out));
 
-	int written, total_written;
-	written = total_written = 0;
+	int total_bits_written = 0;
+
 	int byte_offset, bit_offset;
 	byte_offset = bit_offset = 0;
 
@@ -54,28 +54,29 @@ int huffman_encode_file(HuffmanNode *root, FILE *input, FILE *output) {
 	tree_data_size = sizeof(uint16_t) + data.size ;
 
 	byte_offset = tree_data_size;
-	bit_offset = tree_data_size * 8;
+	bit_offset = tree_data_size * BYTE_SIZE;
 
 	while ((bytes = fread(in, sizeof(uint8_t), FILE_BUFFER_LEN, input)) > 0) {
 		for (int i = 0; i < bytes; i++) {
 			struct Codeword *cw = encoder_get_codeword(&encoder, in[i]);
-			written = encoder_write(&encoder, cw, out, FILE_BUFFER_LEN, bit_offset);
+			int bits_written = encoder_write(&encoder, cw, out, FILE_BUFFER_LEN, bit_offset);
 
-			if (written > 0) {
-				total_written += written;
-				bit_offset += written;
+			if (bits_written > 0) {
+				total_bits_written += bits_written;
+				bit_offset += bits_written;
 				byte_offset = bit_offset / BYTE_SIZE;
 			}
 
-			if (byte_offset >= FILE_BUFFER_LEN - 1) {
-				uint8_t last_byte = out[bit_offset / 8];
+			if (byte_offset >= FILE_BUFFER_LEN - MAX_CODEWORD_SIZE) {
+				uint8_t last_bytes[MAX_CODEWORD_SIZE];
+				memcpy(last_bytes, &out[FILE_BUFFER_LEN - MAX_CODEWORD_SIZE], MAX_CODEWORD_SIZE);
 
-				fwrite(out, sizeof(uint8_t), FILE_BUFFER_LEN - 1, output);
-				memset(out, 0, sizeof(uint8_t));
+				fwrite(out, sizeof(uint8_t), FILE_BUFFER_LEN - MAX_CODEWORD_SIZE, output);
+				memset(out, 0, sizeof(uint8_t) * FILE_BUFFER_LEN);
 
 				bit_offset = bit_offset % 8;
-				byte_offset = 0;
-				out[0] = last_byte;
+				byte_offset -= FILE_BUFFER_LEN - MAX_CODEWORD_SIZE; 
+				memcpy(out, last_bytes, MAX_CODEWORD_SIZE);
 			}
 		}
 
@@ -93,7 +94,7 @@ int huffman_encode_file(HuffmanNode *root, FILE *input, FILE *output) {
 	tree_data_buffer[0] |= data.trash << 5;
 	fwrite(tree_data_buffer, sizeof(uint8_t), tree_data_size, output);
 
-	int written_bytes = tree_data_size + (total_written / 8);
+	int written_bytes = tree_data_size + (total_bits_written / 8);
 	return written_bytes;
 }
 

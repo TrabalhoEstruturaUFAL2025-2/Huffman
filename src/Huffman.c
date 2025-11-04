@@ -51,7 +51,7 @@ HuffmanNode *huffman_arena_new_internal_node(Vector *node_arena, HuffmanNode *le
 	return node;
 }
 
-int huffman_nodes_from_table(Vector *node_arena, unsigned char table[256]) {
+int huffman_nodes_from_table(Vector *node_arena, int table[256]) {
 	HuffmanNode leaf;
 	int byte_count = 0;
 

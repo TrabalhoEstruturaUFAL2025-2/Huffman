@@ -186,7 +186,7 @@ int huffman_nodes_from_bytes(Vector *node_arena, unsigned char *bytes, size_t si
  * @see huffman_arena_new_leaf()
  * @see huffman_nodes_from_bytes()
  */
- int huffman_nodes_from_table(Vector *node_arena, unsigned char table[256]);
+ int huffman_nodes_from_table(Vector *node_arena, int table[256]);
 
 /**
  * @brief Constrói a árvore de Huffman a partir dos nós folha na arena.

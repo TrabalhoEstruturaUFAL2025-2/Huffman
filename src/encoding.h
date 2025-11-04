@@ -6,6 +6,8 @@
 
 #include <string.h>
 
+#define MAX_CODEWORD_SIZE sizeof(uint32_t)
+
 /**
  * @struct Codeword
  * @brief Estrutura POD (Plain Old Data) que representa uma palavra-código de Huffman.
