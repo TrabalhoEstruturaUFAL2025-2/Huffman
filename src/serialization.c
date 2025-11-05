@@ -8,16 +8,20 @@
 #define INTERNAL_SYMBOL '*'
 
 int serialize_recursive(HuffmanNode *node, uint8_t *buffer, size_t len, size_t *i) {
+	// nota: static declara que a variável é compartilhada por todas as chamadas de função
+	// serve como constante aqui, de tal forma que só é inicializada uma única vez
 	static char *ERROR = "serialization error: maximum buffer size exceeded\n";
 
 	if (node == NULL) {
 		return 0;
 	}
 
+	// Tamanho do buffer excedido
 	if (*i >= len) goto error;
 
 	if (node->left == NULL && node->right == NULL) {
 		if (node->symbol == ESCAPE_SYMBOL || node->symbol == INTERNAL_SYMBOL) {
+			// nota: buffer[(*i)++] = x iguala o *i-ésimo elemento do buffer a x e incrementa *i
 			buffer[(*i)++] = ESCAPE_SYMBOL;
 			if (*i >= len) goto error;
 		}
@@ -47,10 +51,13 @@ int serialize_recursive(HuffmanNode *node, uint8_t *buffer, size_t len, size_t *
 int serialize_tree(HuffmanNode *root, uint8_t *buffer, size_t buffer_size) {
 	size_t i = 0;
 
+	// é passado ponteiro para i para que todas as chamadas da função tenham acesso
+	// ao seu valor e incrementem-no à medida que é usada para escrever no buffer
 	if (serialize_recursive(root, buffer, buffer_size, &i) > 0) {
 		return -1;
 	}
 
+	// i resulta na quantidade bytes escritos no bufer
 	return i;
 }
 
@@ -102,6 +109,7 @@ struct TreeData tree_data_from_root(HuffmanNode *root) {
 }
 
 int write_tree(struct TreeData *data, uint8_t *buffer, size_t len, size_t offset) {
+	// escreve a árvore depois dos bytes usados para tamanho e lixo
 	int bytes = serialize_tree(data->root, buffer + offset + 2, len - 2);
 	if (bytes < 0) {
 		return -1;
@@ -109,6 +117,11 @@ int write_tree(struct TreeData *data, uint8_t *buffer, size_t len, size_t offset
 
 	data->size = bytes;
 	
+	// ex:
+	// lixo: 00000010 (3 bits)
+	// tamanho: 00001100 00000000 (13 bits)
+	// lixo << 5 = 01000000 ; tamanho >> 8 = 00001100
+	// juntas os dois com | , resultando em 01001100.
 	buffer[offset] = (uint8_t) ((data->size >> 8) | (data->trash << 5));
 	buffer[offset + 1] = (uint8_t) (data->size & 0xFF);
 

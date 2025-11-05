@@ -52,6 +52,7 @@ int encoder_write(
 		return 0;
 	}
 
+	// Escreva os bits do código no buffer começando bit_offset-ésimo bit dele
 	write_bits_from_uint32(codeword->bits, codeword->length, buffer, bit_offset);
 
 	return codeword->length;
@@ -67,6 +68,7 @@ Decoder new_decoder(HuffmanNode *root) {
 }
 
 int decoder_feed(Decoder *decoder, uint8_t byte) {
+	// Se ainda houver um byte sendo processado retorne -1 (error)
 	if (decoder->curr_bit >= 0 && decoder->curr_bit <= BYTE_SIZE - 1) {
 		return -1;
 	}
@@ -79,10 +81,13 @@ int decoder_feed(Decoder *decoder, uint8_t byte) {
 
 
 int decoder_consume(Decoder *decoder, uint8_t *out) {	
+	// Percorra os bits do byte sendo processado partindo
+	// do último em que foi encontrado um símbolo
 	while (decoder->curr_bit < BYTE_SIZE) {
 		// Nth bit -> extrai o enésimo bit
 		uint8_t bit = NTH_BIT(decoder->byte, decoder->curr_bit);
 
+		// 0 -> esquerda | 1 -> direita
 		if (bit) {
 			decoder->current_node = decoder->current_node->right;
 		} else {
@@ -91,6 +96,7 @@ int decoder_consume(Decoder *decoder, uint8_t *out) {
 
 		decoder->curr_bit++;
 
+		// Folha encontrada; guarde o resultado no endereço apontado por out
 		if (IS_LEAF(decoder->current_node)) {
 			*out = decoder->current_node->symbol;
 			decoder->current_node = decoder->root;
@@ -99,6 +105,7 @@ int decoder_consume(Decoder *decoder, uint8_t *out) {
 		}
 	}
 
+	// Símbolo: *
 	*out = decoder->current_node->symbol;
 
 	return 0;
